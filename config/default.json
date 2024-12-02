@@ -1,0 +1,12 @@
+{
+    "mongodb": {
+        "connectionString": "mongodb+srv://yusasive:yDty7oDTXcPayROe@yusasive.dwzc5vv.mongodb.net/exam"
+    },
+    "jwt": {
+        "secret" : "1IEt7j-izpr-2GucODuCCzGsHqGSKytoULxrfQkaH9q445lE7NC-NBV-V9qAE1aJ"
+    },
+    "mail-credentials" : {
+        "userid" :"yusufabdullahi2910@gmail.com",
+        "password" : "azgnteyvnenqqyfr"
+    }
+}
