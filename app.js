@@ -10,13 +10,22 @@ var passport = require("./services/passportconf");
 var app = express();
 const cors = require('cors');
 
+app.use((req, res, next) => {
+  if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
+    return res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
+
 app.use(helmet());
+
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://examination-portal-six.vercel.app', 'https://physical-sciences.netlify.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+  origin: ['http://localhost:3000', 'https://examination-portal-six.vercel.app', 'https://physical-sciences.netlify.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,  
 };
+
 app.use(cors(corsOptions));
 
 app.options('*', cors(corsOptions));
@@ -35,7 +44,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({ secret: 'express-session secret' }));
+
+app.use(session({ secret: 'express-session secret', resave: false, saveUninitialized: true }));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -46,19 +58,19 @@ app.use('/api/v1/admin', passport.authenticate('admin-token', { session: false }
 app.use('/api/v1/user', passport.authenticate('user-token', { session: false }), user);
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '/public/index.html'));
+  res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
-app.use(function(req, res, next) {
-    next(createError(404, "Invalid API. Use the official documentation to get the list of valid APIS."));
+app.use(function (req, res, next) {
+  next(createError(404, "Invalid API. Use the official documentation to get the list of valid APIs."));
 });
 
 app.use((err, req, res, next) => {
-    console.log(err);
-    res.status(err.status).json({
-        success: false,
-        message: err.message,
-    });
+  console.log(err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message,
+  });
 });
 
 module.exports = app;
